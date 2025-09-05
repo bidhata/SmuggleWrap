@@ -8,7 +8,14 @@ export function xorEncode(data: ArrayBuffer, key: string): string {
     result[i] = bytes[i] ^ keyBytes[i % keyBytes.length];
   }
   
-  return btoa(String.fromCharCode.apply(null, Array.from(result)));
+  // Convert to base64 using chunks to avoid call stack limit
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < result.length; i += chunkSize) {
+    const chunk = result.slice(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, Array.from(chunk));
+  }
+  return btoa(binary);
 }
 
 export function xorDecode(encodedData: string, key: string): ArrayBuffer {
@@ -39,7 +46,14 @@ export async function aesEncode(data: ArrayBuffer, key: string): Promise<string>
   combined.set(new Uint8Array(data), 0);
   combined.set(keyData, data.byteLength);
   
-  return btoa(String.fromCharCode.apply(null, Array.from(combined)));
+  // Convert to base64 using chunks to avoid call stack limit
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < combined.length; i += chunkSize) {
+    const chunk = combined.slice(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, Array.from(chunk));
+  }
+  return btoa(binary);
 }
 
 export async function aesDecode(encodedData: string, key: string): Promise<ArrayBuffer> {
@@ -63,7 +77,14 @@ export async function aesDecode(encodedData: string, key: string): Promise<Array
 // Base64 encoding
 export function base64Encode(data: ArrayBuffer): string {
   const bytes = new Uint8Array(data);
-  return btoa(String.fromCharCode.apply(null, Array.from(bytes)));
+  // Convert to base64 using chunks to avoid call stack limit
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.slice(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, Array.from(chunk));
+  }
+  return btoa(binary);
 }
 
 export function base64Decode(encodedData: string): ArrayBuffer {
