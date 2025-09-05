@@ -74,7 +74,7 @@ StealthDrop is a professional HTML payload generator designed for authorized sec
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/bidhata/SmuggleWrap 
+   git clone https://github.com/bidhata/StealthDrop
    cd stealthdrop
    ```
 
