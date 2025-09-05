@@ -16,11 +16,6 @@ export interface Config {
   encryptionKey: string;
   autoDownload: boolean;
   stealthMode: boolean;
-  fakeContent: boolean;
-  obfuscateCode: boolean;
-  randomDelay: boolean;
-  storageMethod: 'css' | 'localStorage' | 'sessionStorage' | 'indexedDB';
-  antiAnalysis: boolean;
 }
 
 export default function Home() {
@@ -29,12 +24,7 @@ export default function Home() {
     method: 'aes',
     encryptionKey: '',
     autoDownload: true,
-    stealthMode: false,
-    fakeContent: true,
-    obfuscateCode: true,
-    randomDelay: true,
-    storageMethod: 'css',
-    antiAnalysis: true
+    stealthMode: false
   });
   const [generatedPayload, setGeneratedPayload] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
