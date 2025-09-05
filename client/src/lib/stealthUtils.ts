@@ -57,7 +57,7 @@ export function generateRandomDelay(): string {
   const randomDelay = delays[Math.floor(Math.random() * delays.length)];
   return `
     // Random execution delay
-    await new Promise(resolve => setTimeout(resolve, ${randomDelay} + Math.random() * 1000));
+    setTimeout(function() { /* delay execution */ }, ${randomDelay} + Math.random() * 1000);
   `;
 }
 
