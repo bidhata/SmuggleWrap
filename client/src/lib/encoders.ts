@@ -8,7 +8,7 @@ export function xorEncode(data: ArrayBuffer, key: string): string {
     result[i] = bytes[i] ^ keyBytes[i % keyBytes.length];
   }
   
-  return btoa(String.fromCharCode(...result));
+  return btoa(String.fromCharCode.apply(null, Array.from(result)));
 }
 
 export function xorDecode(encodedData: string, key: string): ArrayBuffer {
@@ -39,7 +39,7 @@ export async function aesEncode(data: ArrayBuffer, key: string): Promise<string>
   combined.set(new Uint8Array(data), 0);
   combined.set(keyData, data.byteLength);
   
-  return btoa(String.fromCharCode(...combined));
+  return btoa(String.fromCharCode.apply(null, Array.from(combined)));
 }
 
 export async function aesDecode(encodedData: string, key: string): Promise<ArrayBuffer> {
@@ -63,7 +63,7 @@ export async function aesDecode(encodedData: string, key: string): Promise<Array
 // Base64 encoding
 export function base64Encode(data: ArrayBuffer): string {
   const bytes = new Uint8Array(data);
-  return btoa(String.fromCharCode(...bytes));
+  return btoa(String.fromCharCode.apply(null, Array.from(bytes)));
 }
 
 export function base64Decode(encodedData: string): ArrayBuffer {
