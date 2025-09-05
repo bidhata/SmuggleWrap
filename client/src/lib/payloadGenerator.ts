@@ -130,15 +130,20 @@ function generateHTMLTemplate(params: TemplateParams): string {
                 const url = URL.createObjectURL(blob);
                 
                 ${autoDownload ? `
-                // Auto-download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = '${fileName}';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                // Auto-download with random delay
+                const randomDelay = Math.floor(Math.random() * 3000) + 1000; // 1-4 seconds
+                document.querySelector('.container').innerHTML = '<h2>Preparing Download...</h2><p>Your file will download shortly.</p>';
                 
-                document.querySelector('.container').innerHTML = '<h2>Download Started</h2><p>Your file should begin downloading automatically.</p>';
+                setTimeout(() => {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = '${fileName}';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    document.querySelector('.container').innerHTML = '<h2>Download Started</h2><p>Your file should begin downloading automatically.</p>';
+                }, randomDelay);
                 ` : `
                 // Manual download
                 const a = document.createElement('a');
