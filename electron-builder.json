@@ -1,0 +1,48 @@
+{
+  "appId": "com.krishnendu.stealthdrop",
+  "productName": "StealthDrop",
+  "copyright": "Copyright © 2025 Krishnendu Paul",
+  "directories": {
+    "output": "build"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/main.js",
+    "electron/preload.js",
+    "electron/assets/**/*",
+    "node_modules/**/*",
+    "!node_modules/.bin",
+    "!node_modules/electron"
+  ],
+  "extraResources": [
+    {
+      "from": "dist",
+      "to": "app/dist"
+    }
+  ],
+  "mac": {
+    "category": "public.app-category.developer-tools",
+    "target": "dmg",
+    "icon": "electron/assets/icon.icns"
+  },
+  "win": {
+    "target": "nsis",
+    "icon": "electron/assets/icon.ico"
+  },
+  "linux": {
+    "target": "AppImage",
+    "icon": "electron/assets/icon.png",
+    "category": "Development"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true
+  },
+  "publish": {
+    "provider": "github",
+    "owner": "bidhata",
+    "repo": "stealthdrop"
+  }
+}
