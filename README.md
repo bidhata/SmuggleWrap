@@ -1,8 +1,8 @@
-# StealthDrop
+# StealthDrop by @Bidhata
 
 **Version:** 1.0.0  
 **License:** MIT  
-**Category:** Security Research Tool
+**Category:** Security Research Tool 
 
 StealthDrop is a professional HTML payload generator designed for authorized security testing and red team operations. It allows security researchers to encode files into various formats and generate self-extracting HTML payloads that can bypass content filters and demonstrate browser-based security vulnerabilities.
 
@@ -74,7 +74,7 @@ StealthDrop is a professional HTML payload generator designed for authorized sec
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/bidhata/SmuggleWrap 
    cd stealthdrop
    ```
 
@@ -309,12 +309,6 @@ MIT License - see LICENSE file for details.
 
 This tool is provided for educational and authorized security testing purposes only. The developers are not responsible for any misuse or damage caused by this tool. Users are solely responsible for ensuring they have proper authorization before using this tool against any systems.
 
-## 📞 Support
-
-- **Documentation**: [Project Wiki](wiki-url)
-- **Issues**: [GitHub Issues](issues-url)
-- **Security**: [Security Policy](security-url)
-- **Community**: [Discord Server](discord-url)
 
 ---
 
