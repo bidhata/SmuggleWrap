@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Shield, HelpCircle, Zap, Search } from "lucide-react";
+import { Shield, HelpCircle } from "lucide-react";
 import FileUpload from "@/components/FileUpload";
 import MethodSelection from "@/components/MethodSelection";
 import ConfigurationPanel from "@/components/ConfigurationPanel";
 import GenerationPanel from "@/components/GenerationPanel";
 import PayloadPreview from "@/components/PayloadPreview";
-import ForensicAnalysis from "@/components/ForensicAnalysis";
 
 export interface FileData {
   file: File;
@@ -22,9 +21,6 @@ export interface Config {
   randomDelay: boolean;
   storageMethod: 'css' | 'localStorage' | 'sessionStorage' | 'indexedDB';
   antiAnalysis: boolean;
-  aiEnhanced: boolean;
-  aiContentType: 'auto' | 'corporate' | 'financial' | 'technical' | 'legal';
-  aiObfuscationLevel: 'basic' | 'advanced' | 'expert';
 }
 
 export default function Home() {
@@ -38,14 +34,10 @@ export default function Home() {
     obfuscateCode: true,
     randomDelay: true,
     storageMethod: 'css',
-    antiAnalysis: true,
-    aiEnhanced: true,
-    aiContentType: 'auto',
-    aiObfuscationLevel: 'advanced'
+    antiAnalysis: true
   });
   const [generatedPayload, setGeneratedPayload] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState<'generate' | 'analyze'>('generate');
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,101 +68,69 @@ export default function Home() {
       </header>
 
       <div className="container mx-auto px-6 py-8">
-        {/* Mode Selection Tabs */}
-        <div className="flex space-x-4 mb-8">
-          <button
-            onClick={() => setActiveTab('generate')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'generate'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-            }`}
-            data-testid="tab-generate"
-          >
-            <Zap className="w-4 h-4" />
-            <span>Payload Generation</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('analyze')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'analyze'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-            }`}
-            data-testid="tab-analyze"
-          >
-            <Search className="w-4 h-4" />
-            <span>Forensic Analysis</span>
-          </button>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            <FileUpload
+              selectedFile={selectedFile}
+              onFileSelect={setSelectedFile}
+            />
+            
+            <MethodSelection
+              selectedMethod={config.method}
+              onMethodChange={(method) => setConfig(prev => ({ ...prev, method }))}
+            />
 
-        {activeTab === 'generate' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Sidebar */}
-            <div className="lg:col-span-1 space-y-6">
-              <FileUpload
-                selectedFile={selectedFile}
-                onFileSelect={setSelectedFile}
-              />
-              
-              <MethodSelection
-                selectedMethod={config.method}
-                onMethodChange={(method) => setConfig(prev => ({ ...prev, method }))}
-              />
+            <ConfigurationPanel
+              config={config}
+              onConfigChange={setConfig}
+            />
+          </div>
 
-              <ConfigurationPanel
-                config={config}
-                onConfigChange={setConfig}
-              />
-            </div>
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            <GenerationPanel
+              selectedFile={selectedFile}
+              config={config}
+              onGenerate={setGeneratedPayload}
+              isGenerating={isGenerating}
+              setIsGenerating={setIsGenerating}
+              generatedPayload={generatedPayload}
+            />
 
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              <GenerationPanel
-                selectedFile={selectedFile}
-                config={config}
-                onGenerate={setGeneratedPayload}
-                isGenerating={isGenerating}
-                setIsGenerating={setIsGenerating}
-                generatedPayload={generatedPayload}
-              />
+            <PayloadPreview payload={generatedPayload} />
 
-              <PayloadPreview payload={generatedPayload} />
-
-              {/* Security Warning */}
-              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-destructive/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Shield className="text-destructive text-sm" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-destructive mb-2">Security Notice</h3>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      This tool is designed for authorized security testing and red team operations only. 
-                      The generated payloads should only be used in controlled environments with proper authorization.
-                    </p>
-                    <div className="space-y-2 text-xs text-muted-foreground">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-primary rounded-full" />
-                        <span>Obtain proper authorization before testing</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-primary rounded-full" />
-                        <span>Use only in isolated test environments</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-primary rounded-full" />
-                        <span>Follow responsible disclosure practices</span>
-                      </div>
+            {/* Security Warning */}
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-destructive/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Shield className="text-destructive text-sm" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-destructive mb-2">Security Notice</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    This tool is designed for authorized security testing and red team operations only. 
+                    The generated payloads should only be used in controlled environments with proper authorization.
+                  </p>
+                  <div className="space-y-2 text-xs text-muted-foreground">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-primary rounded-full" />
+                      <span>Obtain proper authorization before testing</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-primary rounded-full" />
+                      <span>Use only in isolated test environments</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-primary rounded-full" />
+                      <span>Follow responsible disclosure practices</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        ) : (
-          <ForensicAnalysis />
-        )}
+        </div>
       </div>
 
       {/* Footer */}

