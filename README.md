@@ -38,7 +38,7 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-repo/stealthdrop.git
+   git clone https://github.com/bidhata/stealthdrop.git
    cd stealthdrop
    ```
 
@@ -304,7 +304,7 @@ Krishnendu Paul is a cybersecurity professional specializing in offensive securi
 
 ⭐ **Star this repository if you find it useful!**
 
-🐛 **Found a bug?** [Create an issue](https://github.com/your-repo/stealthdrop/issues)
+🐛 **Found a bug?** [Create an issue](https://github.com/bidhata/stealthdrop/issues)
 
 💡 **Have suggestions?** We'd love to hear from you!
 
