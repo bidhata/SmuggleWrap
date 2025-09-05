@@ -1,9 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import aiRoutes from "./aiRoutes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // put application routes here
+  // AI-powered content generation routes
+  app.use('/api', aiRoutes);
+
+  // put other application routes here
   // prefix all routes with /api
 
   // use storage to perform CRUD operations on the storage interface

@@ -21,6 +21,9 @@ export interface Config {
   randomDelay: boolean;
   storageMethod: 'css' | 'localStorage' | 'sessionStorage' | 'indexedDB';
   antiAnalysis: boolean;
+  aiEnhanced: boolean;
+  aiContentType: 'auto' | 'corporate' | 'financial' | 'technical' | 'legal';
+  aiObfuscationLevel: 'basic' | 'advanced' | 'expert';
 }
 
 export default function Home() {
@@ -34,7 +37,10 @@ export default function Home() {
     obfuscateCode: true,
     randomDelay: true,
     storageMethod: 'css',
-    antiAnalysis: true
+    antiAnalysis: true,
+    aiEnhanced: true,
+    aiContentType: 'auto',
+    aiObfuscationLevel: 'advanced'
   });
   const [generatedPayload, setGeneratedPayload] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
