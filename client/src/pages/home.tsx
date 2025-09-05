@@ -40,7 +40,7 @@ export default function Home() {
                 <Shield className="text-primary-foreground text-sm" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">Smugglo</h1>
+                <h1 className="text-xl font-bold">StealthDrop</h1>
                 <p className="text-xs text-muted-foreground">HTML Payload Generator v1.0.0</p>
               </div>
             </div>
@@ -128,7 +128,7 @@ export default function Home() {
         <div className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              Smugglo v1.0.0 - Professional Security Tool
+              StealthDrop v1.0.0 - Professional Security Tool
             </div>
             <div className="flex items-center space-x-6 text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">Documentation</a>

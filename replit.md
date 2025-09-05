@@ -1,6 +1,6 @@
 # Overview
 
-This is "Smugglo", an HTML Payload Generator security tool that allows users to encode files into various formats and generate HTML payloads for security testing purposes. The application provides multiple encoding methods including CSS encoding, XOR encryption, AES-GCM encryption, Base64, and Hex encoding. Users can upload files, configure encoding settings, and generate downloadable HTML payloads that contain the encoded file data.
+This is "StealthDrop", an HTML Payload Generator security tool that allows users to encode files into various formats and generate HTML payloads for security testing purposes. The application provides multiple encoding methods including CSS encoding, XOR encryption, AES-GCM encryption, Base64, and Hex encoding. Users can upload files, configure encoding settings, and generate downloadable HTML payloads that contain the encoded file data.
 
 # User Preferences
 

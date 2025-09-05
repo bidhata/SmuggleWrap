@@ -79,7 +79,7 @@ export default function GenerationPanel({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `smugglo_payload_${Date.now()}.html`;
+    a.download = `stealth_payload_${Date.now()}.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -170,7 +170,7 @@ export default function GenerationPanel({
               <div>
                 <p className="font-medium text-sm">Payload Generated Successfully</p>
                 <p className="text-xs text-muted-foreground">
-                  smugglo_payload.html • {formatFileSize(new Blob([generatedPayload]).size)}
+                  stealth_payload.html • {formatFileSize(new Blob([generatedPayload]).size)}
                 </p>
               </div>
             </div>
